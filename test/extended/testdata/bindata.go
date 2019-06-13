@@ -216,6 +216,7 @@
 // test/extended/testdata/service-serving-cert/nginx-serving-cert.conf
 // test/extended/testdata/signer-buildconfig.yaml
 // test/extended/testdata/sriovnetwork/Dockerfile
+// test/extended/testdata/sriovnetwork/config-map.yaml
 // test/extended/testdata/sriovnetwork/debug-pod.yaml
 // test/extended/testdata/sriovnetwork/dp-daemon.yaml
 // test/extended/testdata/sriovnetwork/provision_sriov.sh
@@ -12550,6 +12551,61 @@ func testExtendedTestdataSriovnetworkDockerfile() (*asset, error) {
 	return a, nil
 }
 
+var _testExtendedTestdataSriovnetworkConfigMapYaml = []byte(`apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sriovdp-config
+data:
+  config.json: |
+    {
+        "resourceList": [{
+                "resourceName": "intel_dpdk_XXV710",
+                "selectors": {
+                    "vendors": ["8086"],
+                    "devices": ["154c"],
+                    "drivers": ["vfio-pci"]
+                }
+            },
+            {
+                "resourceName": "intel_XXV710",
+                "selectors": {
+                    "vendors": ["8086"],
+                    "devices": ["154c"]
+                }
+            },
+            {
+                "resourceName": "mlx_ConnectX5",
+                "selectors": {
+                    "vendors": ["15b3"],
+                    "devices": ["1018"]
+                }
+            },
+            {
+                "resourceName": "mlx_ConnectX4_Lx",
+                "selectors": {
+                    "vendors": ["15b3"],
+                    "devices": ["1016"]
+                }
+            }
+        ]
+    }
+`)
+
+func testExtendedTestdataSriovnetworkConfigMapYamlBytes() ([]byte, error) {
+	return _testExtendedTestdataSriovnetworkConfigMapYaml, nil
+}
+
+func testExtendedTestdataSriovnetworkConfigMapYaml() (*asset, error) {
+	bytes, err := testExtendedTestdataSriovnetworkConfigMapYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test/extended/testdata/sriovnetwork/config-map.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _testExtendedTestdataSriovnetworkDebugPodYaml = []byte(`apiVersion: v1
 kind: Pod
 metadata:
@@ -12600,6 +12656,12 @@ func testExtendedTestdataSriovnetworkDebugPodYaml() (*asset, error) {
 }
 
 var _testExtendedTestdataSriovnetworkDpDaemonYaml = []byte(`---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sriov-device-plugin
+
+---
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
@@ -12629,7 +12691,7 @@ spec:
       serviceAccountName: sriov-device-plugin
       containers:
       - name: sriov-device-plugin
-        image: quay.io/openshift/ose-sriov-network-device-plugin:v4.1.0
+        image: quay.io/openshift/ose-sriov-network-device-plugin:v4.2.0
         args:
         - --log-level=10
         securityContext:
@@ -12638,16 +12700,18 @@ spec:
         - name: devicesock
           mountPath: /var/lib/kubelet/
           readOnly: false
-        - name: net
-          mountPath: /sys/class/net
-          readOnly: true
+        - name: config-volume
+          mountPath: /etc/pcidp
       volumes:
         - name: devicesock
           hostPath:
             path: /var/lib/kubelet/
-        - name: net
-          hostPath:
-            path: /sys/class/net
+        - name: config-volume
+          configMap:
+            name: sriovdp-config
+            items:
+            - key: config.json
+              path: config.json
 `)
 
 func testExtendedTestdataSriovnetworkDpDaemonYamlBytes() ([]byte, error) {
@@ -33516,6 +33580,7 @@ var _bindata = map[string]func() (*asset, error){
 	"test/extended/testdata/service-serving-cert/nginx-serving-cert.conf": testExtendedTestdataServiceServingCertNginxServingCertConf,
 	"test/extended/testdata/signer-buildconfig.yaml": testExtendedTestdataSignerBuildconfigYaml,
 	"test/extended/testdata/sriovnetwork/Dockerfile": testExtendedTestdataSriovnetworkDockerfile,
+	"test/extended/testdata/sriovnetwork/config-map.yaml": testExtendedTestdataSriovnetworkConfigMapYaml,
 	"test/extended/testdata/sriovnetwork/debug-pod.yaml": testExtendedTestdataSriovnetworkDebugPodYaml,
 	"test/extended/testdata/sriovnetwork/dp-daemon.yaml": testExtendedTestdataSriovnetworkDpDaemonYaml,
 	"test/extended/testdata/sriovnetwork/provision_sriov.sh": testExtendedTestdataSriovnetworkProvision_sriovSh,
@@ -34038,6 +34103,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				"signer-buildconfig.yaml": &bintree{testExtendedTestdataSignerBuildconfigYaml, map[string]*bintree{}},
 				"sriovnetwork": &bintree{nil, map[string]*bintree{
 					"Dockerfile": &bintree{testExtendedTestdataSriovnetworkDockerfile, map[string]*bintree{}},
+					"config-map.yaml": &bintree{testExtendedTestdataSriovnetworkConfigMapYaml, map[string]*bintree{}},
 					"debug-pod.yaml": &bintree{testExtendedTestdataSriovnetworkDebugPodYaml, map[string]*bintree{}},
 					"dp-daemon.yaml": &bintree{testExtendedTestdataSriovnetworkDpDaemonYaml, map[string]*bintree{}},
 					"provision_sriov.sh": &bintree{testExtendedTestdataSriovnetworkProvision_sriovSh, map[string]*bintree{}},
