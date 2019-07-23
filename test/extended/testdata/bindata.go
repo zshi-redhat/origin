@@ -12788,6 +12788,8 @@ kind: Pod
 metadata:
   name: sriov-debug-pod
 spec:
+  nodeSelector:
+    node.sriovStatus: provisioning
   containers:
   - command:
     - /bin/sh
