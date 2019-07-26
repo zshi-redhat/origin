@@ -12781,7 +12781,7 @@ spec:
       serviceAccountName: sriov-cni
       containers:
       - name: sriov-cni
-        image: nfvpe/sriov-cni
+        image: quay.io/openshift/origin-sriov-cni:4.2
         securityContext:
           privileged: true
         volumeMounts:
@@ -12897,8 +12897,7 @@ spec:
       serviceAccountName: sriov-device-plugin
       containers:
       - name: sriov-device-plugin
-        #image: quay.io/openshift/ose-sriov-network-device-plugin:v4.2.0
-        image: nfvpe/sriov-device-plugin
+        image: quay.io/openshift/origin-sriov-network-device-plugin:4.2
         args:
         - --log-level=10
         - --resource-prefix=openshift.com
